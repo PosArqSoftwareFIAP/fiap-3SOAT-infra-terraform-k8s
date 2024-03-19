@@ -21,4 +21,4 @@ jobs:
         terraform init
         terraform apply -auto-approve
       env:
-        TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
+        do_token: ${{ secrets.DO_TOKEN }}
