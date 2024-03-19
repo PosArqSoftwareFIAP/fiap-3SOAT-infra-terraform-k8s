@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "digitalocean" {
-  token = var.do_token
+  token = local.do_token
 }
 
 resource "digitalocean_kubernetes_cluster" "my_k8s_cluster" {

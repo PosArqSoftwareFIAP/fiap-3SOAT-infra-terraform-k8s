@@ -23,9 +23,10 @@ jobs:
       with:
         token: ${{ secrets.DO_TOKEN }}
 
+    - name: Create do token
+      run: echo -e "\nlocals {\n\tdo_token=\"${{ secrets.DO_TOKEN }}\"\n}" > env_locals.tf
+
     - name: Terraform Init and Apply
       run: |
         terraform init
         terraform apply -auto-approve
-      env:
-        do_token: ${{ secrets.DO_TOKEN }}
