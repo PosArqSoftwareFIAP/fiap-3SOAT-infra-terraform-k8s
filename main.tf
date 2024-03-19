@@ -18,7 +18,7 @@ resource "digitalocean_kubernetes_cluster" "my_k8s_cluster" {
 
   node_pool {
     name       = "fiap-food-pool"
-    size       = "s-1vcpu-1gb"
+    size       = "s-1vcpu-2gb"
     node_count = 1
   }
 }
