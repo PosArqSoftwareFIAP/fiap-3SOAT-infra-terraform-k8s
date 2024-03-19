@@ -8,87 +8,17 @@ on:
 permissions: write-all
 
 jobs:
-  terraformDeploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.0
+    - uses: actions/checkout@v2
 
-      - name: Read .yml file
-        id: read-yml
-        run: |
-          value=$(yq e '.destroy' destroy.yml)
-          echo "destroy=$value" >> $GITHUB_ENV
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Set Terraform Database User
-        run: echo "local {username=secrets.USERNAME_DB}" >> $GITHUB_ENV
-
-
-      - name: Set Terraform Database Password
-        run: echo "local {password=secrets.PASSWORD_DB}" >> $GITHUB_ENV
-
-
-      - name: Create S3 Bucket
-        run: |
-          aws s3 mb s3://pandarium-fiapfood --region us-east-1
-
-      - name: Setup Terraform Backend Configuration
-        run: |
-          cat > backend.tf << EOF
-          terraform {
-            backend "s3" {
-              bucket         = "pandarium-fiapfood"
-              key            = "pandarium-fiapfood/teste2/terraform.tfstate"
-              region         = "us-east-1"
-              # encrypt        = true
-            }
-          }
-          EOF
-          
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Plan
-        run: |
-            if [ "${{ env.destroy }}" == "false" ]; then
-              terraform plan -var-file="execution.tfvars"
-            # elif [ "${{ env.destroy }}" == "true" ]; then
-            #   terraform plan -destroy
-            # else
-            #   echo "Action not recognized. No Terraform action taken."
-            fi
-        # run: terraform plan -var-file="execution.tfvars"
-        
-      - name: Terraform Apply
-        
-        run: |
-            if [ "${{ env.destroy }}" == "false" ]; then
-              terraform apply -var-file="execution.tfvars" -auto-approve
-              echo "Rodando o apply"
-            else
-              echo "Action not recognized. No Terraform action taken."
-            fi
-        # run: terraform apply -var-file="execution.tfvars" -auto-approve
-
-
-      - name: Terraform destroy
-        
-        run: |
-            if [ "${{ env.destroy }}" == "true" ]; then
-              terraform destroy -auto-approve  -refresh=false
-              echo "Rodando o apply"
-            else
-              echo "Action not recognized. No Terraform action taken."
-            fi
-        # run: terraform apply -var-file="execution.tfvars" -auto-approve
+    - name: Terraform Init and Apply
+      run: |
+        terraform init
+        terraform apply -auto-approve
+      env:
+        TF_VAR_do_token: ${{ secrets.DO_TOKEN }}
