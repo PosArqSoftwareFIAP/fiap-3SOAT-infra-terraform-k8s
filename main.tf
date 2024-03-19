@@ -13,3 +13,4 @@ resource "digitalocean_kubernetes_cluster" "my_k8s_cluster" {
     node_count = 1
   }
 }
+
